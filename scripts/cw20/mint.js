@@ -17,11 +17,11 @@ const msg = new MsgExecuteContract(
   cw20Contract,
   // ExecuteMsg payload
   {
-    transfer: {
+    mint: {
       // Address of wallet or contract that is getting the tokens
       recipient: "terra1320he3k82kflf9tf729xszudwwznvsyy8x2aqw",
       // Amount of tokens to transfer, in microunits
-      amount: "1000",
+      amount: "6969696969",
     },
   }
 );
