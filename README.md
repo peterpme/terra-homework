@@ -146,6 +146,13 @@ SIGNER=sampleKey1 # Replace with the name of your key from keys.terrain.js.
 npx @terra-money/terrain deploy $CONTRACT_NAME --signer $SIGNER --set-signer-as-admin --network testnet --config-path config.$CONTRACT_NAME.json --no-rebuild
 ```
 
+* If you are on a M1 Mac, you can replace the last 2 steps with this to make it run a lot faster (but only use this for localterra and testnet; use the normal commands above if deploying to mainnet):
+
+```bash
+./build_optimized_wasm_arm64.sh # Notice _arm64.sh added at the end.
+npx @terra-money/terrain deploy $CONTRACT_NAME --signer $SIGNER --set-signer-as-admin --network testnet --config-path config.$CONTRACT_NAME.json --no-rebuild --arm64 # Notice --arm64 flag
+```
+
 
 The `./build_optimized_wasm.sh` part just compiles all of your Rust contracts
 into optimized WASM files that are small enough to be pushed to Terra (Terra has
@@ -178,6 +185,15 @@ CONTRACT_NAME=cw20_token # Replace this with whatever contract you want to deplo
 SIGNER=sampleKey1 # Replace with the name of your key from keys.terrain.js.
 ./build_optimized_wasm.sh
 npx @terra-money/terrain contract:migrate $CONTRACT_NAME --signer $SIGNER --network testnet --config-path config.$CONTRACT_NAME.json
+```
+
+* * If you are on a M1 Mac, you can replace the last 2 steps with this to make it run a lot faster (but only use this for localterra and testnet; use the normal commands above if migrating in mainnet)
+
+```bash
+CONTRACT_NAME=cw20_token # Replace this with whatever contract you want to deploy
+SIGNER=sampleKey1 # Replace with the name of your key from keys.terrain.js.
+./build_optimized_wasm_arm64.sh
+npx @terra-money/terrain contract:migrate $CONTRACT_NAME --signer $SIGNER --network testnet --arm64 --config-path config.$CONTRACT_NAME.json
 ```
 
 When you migrate a contract like this, the `migrate` Rust method of your
@@ -215,3 +231,10 @@ You can also use these scripts as inspiration to build more sophisticated automa
 ## Homework
 
 Now that you are done with this README, continue by reading [`HOMEWORK.md`](https://github.com/am-work/terra-homework/blob/master/HOMEWORK.md)!
+
+
+## Troubleshooting
+
+- You'll notice that `scripts/library.js` has several wallet addresses that aren't synced up with `keys.terrain.js`. Make sure that you go into `scripts/library.js` and copy anything you added to `keys.terrain.js` until this process is automated
+- If you try updating your contract's `instantiateMsg` like total supply and initial balances but don't see them updated, this is by design. If you want to change the minter, total supply, etc. you'll have to publish a new contract with the same info
+- If you're getting `Error: the lock file /code/Cargo.lock needs to be updated but --locked was passed to prevent this`, make sure you are following instructions in the [Deploying a smart contract](https://github.com/am-work/terra-homework#deploying-a-smart-contract) section to the letter.
