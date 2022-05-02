@@ -1,8 +1,7 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
 use cosmwasm_std::{
-    Binary, Deps, DepsMut, Empty, Env, MessageInfo, Response, StdError,
-    StdResult,
+    attr, Binary, Deps, DepsMut, Empty, Env, MessageInfo, Response, StdError, StdResult,
 };
 
 use cw2::set_contract_version;
@@ -10,7 +9,7 @@ use cw2::set_contract_version;
 use crate::error::ContractError;
 use crate::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
 
-// version info for migration info
+// version info or migration info
 const CONTRACT_NAME: &str = "crates.io:swap";
 const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -29,13 +28,50 @@ pub fn instantiate(
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn execute(
-    _deps: DepsMut,
+    deps: DepsMut,
     _env: Env,
-    _info: MessageInfo,
-    _msg: ExecuteMsg,
+    info: MessageInfo,
+    msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
-    // TODO
-    Err(ContractError::NotImplemented {})
+    match msg {
+        ExecuteMsg::Withdraw { amount } => try_withdraw(deps, info, amount, msg),
+    }
+}
+
+pub fn try_withdraw(
+    deps: DepsMut,
+    info: MessageInfo,
+    amount: i32,
+    msg: Binary,
+) -> Result<Response, ContractError> {
+    // this doesn't work but the idea is good
+    // if amount == i32::zero() {
+    //     return Err(ContractError::InvalidZeroAmount {});
+    // }
+
+    if info.sender != state.owner {
+        return Err(ContractError::Unauthorized {});
+    }
+
+    STATE.update(deps.storage, |mut state| -> Result<_, ContractError> {
+        state.count = count;
+        Ok(state)
+    })?;
+
+    let res = Response::new()
+        .add_attribute("method", "try_withdraw")
+        .add_attribute("owner", info.sender)
+        .add_attribute("amount", amount)
+        .add_message(
+            Cw20ReceiveMsg {
+                sender: info.sender.into(),
+                amount,
+                msg,
+            }
+            .into_cosmos_msg(contract)?,
+        );
+
+    Ok(res)
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
